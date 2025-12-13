@@ -1,0 +1,60 @@
+# Compiled class files
+node_modules/
+# Node modules (if any)
+
+Thumbs.db
+ehthumbs.db
+.Trashes
+.Spotlight-V100
+._*
+.DS_Store?
+.DS_Store
+# OS generated files
+
+.env.development.local
+.env.production.local
+.env.local
+.env
+# Environment variables
+
+application-dev.properties
+application-local.properties
+# Application properties (sensitive data)
+
+*.log
+# Log files
+
+.mvn/timing.properties
+buildNumber.properties
+dependency-reduced-pom.xml
+release.properties
+pom.xml.next
+pom.xml.versionsBackup
+pom.xml.releaseBackup
+pom.xml.tag
+target/
+# Maven
+
+.vscode/
+# VS Code
+
+*.ipr
+*.iws
+*.iml
+.idea/
+# IntelliJ IDEA
+
+.settings/
+.project
+.classpath
+# Eclipse
+
+*.rar
+*.tar.gz
+*.zip
+*.ear
+*.war
+*.jar
+target/
+*.class
+

@@ -1,0 +1,649 @@
+package Team.C.Service.Spot.service.impl;
+
+import Team.C.Service.Spot.dto.request.AdminRegistrationRequest;
+import Team.C.Service.Spot.dto.request.CustomerRegistrationRequest;
+import Team.C.Service.Spot.dto.request.LoginRequest;
+import Team.C.Service.Spot.dto.request.ProviderRegistrationRequest;
+import Team.C.Service.Spot.dto.request.UpdateUserRequest;
+import Team.C.Service.Spot.dto.response.UserResponse;
+import Team.C.Service.Spot.dto.Coordinates;
+import Team.C.Service.Spot.mapper.UserMapper;
+import Team.C.Service.Spot.model.User;
+import Team.C.Service.Spot.model.enums.Role;
+import Team.C.Service.Spot.repository.UserRepository;
+import Team.C.Service.Spot.repository.ServiceListingRepository;
+import Team.C.Service.Spot.repository.BookingRepository;
+import Team.C.Service.Spot.repository.SpecificAvailabilityRepository;
+import Team.C.Service.Spot.repository.ReviewRepository;
+import Team.C.Service.Spot.service.UserService;
+import Team.C.Service.Spot.service.LocationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of UserService interface.
+ * Handles all business logic for user management including registration,
+ * authentication, profile updates, and provider search.
+ *
+ * @author Team C
+ * @version 3.0
+ * @since 2025-11-28
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final ServiceListingRepository serviceListingRepository;
+    private final BookingRepository bookingRepository;
+    private final SpecificAvailabilityRepository specificAvailabilityRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final LocationService locationService;
+
+    /**
+     * Register a new admin.
+     * Validates email uniqueness, encodes password, and persists the admin user.
+     */
+    @Override
+    public UserResponse registerAdmin(AdminRegistrationRequest request) {
+        log.info("Registering new admin with email: {}", request.getEmail());
+
+        // Validate email uniqueness
+        if (emailExists(request.getEmail())) {
+            log.error("Email already exists: {}", request.getEmail());
+            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        }
+
+        // Validate phone uniqueness
+        if (phoneExists(request.getPhone())) {
+            log.error("Phone number already exists: {}", request.getPhone());
+            throw new IllegalArgumentException("Phone number already exists: " + request.getPhone());
+        }
+
+        // Build Admin User entity
+        User admin = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .doorNo(request.getDoorNo())
+                .addressLine(request.getAddressLine())
+                .city(request.getCity())
+                .state(request.getState())
+                .pincode(request.getPincode())
+                .role(Role.ADMIN)
+                .active(true)
+                .verified(true) // Admins are verified by default
+                .build();
+
+        // Geocode pincode to get coordinates
+        geocodeAndSetUserLocation(admin, request.getPincode(), "ADMIN");
+
+        // Save to database
+        User savedAdmin = userRepository.save(admin);
+        log.info("Successfully registered admin with ID: {}", savedAdmin.getId());
+
+        // Convert to Response DTO
+        return userMapper.toResponse(savedAdmin);
+    }
+
+    /**
+     * Register a new customer.
+     * Validates email uniqueness, encodes password, and persists the user.
+     */
+    @Override
+    public UserResponse registerCustomer(CustomerRegistrationRequest request) {
+        log.info("Registering new customer with email: {}", request.getEmail());
+
+        // Validate email uniqueness
+        if (emailExists(request.getEmail())) {
+            log.error("Email already exists: {}", request.getEmail());
+            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        }
+
+        // Validate phone uniqueness
+        if (phoneExists(request.getPhone())) {
+            log.error("Phone number already exists: {}", request.getPhone());
+            throw new IllegalArgumentException("Phone number already exists: " + request.getPhone());
+        }
+
+        // Convert DTO to Entity
+        User user = userMapper.toEntity(request);
+
+        // Encode password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Geocode pincode to get coordinates
+        geocodeAndSetUserLocation(user, request.getPincode(), "CUSTOMER");
+
+        // Save to database
+        User savedUser = userRepository.save(user);
+        log.info("Successfully registered customer with ID: {}", savedUser.getId());
+
+        // Convert to Response DTO
+        return userMapper.toResponse(savedUser);
+    }
+
+    /**
+     * Register a new service provider.
+     * Similar to customer registration but includes provider-specific fields.
+     * Automatically creates a default service listing for the provider.
+     */
+    @Override
+    public UserResponse registerProvider(ProviderRegistrationRequest request) {
+        log.info("Registering new provider with email: {}", request.getEmail());
+
+        // Validate email uniqueness
+        if (emailExists(request.getEmail())) {
+            log.error("Email already exists: {}", request.getEmail());
+            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        }
+
+        // Validate phone uniqueness
+        if (phoneExists(request.getPhone())) {
+            log.error("Phone number already exists: {}", request.getPhone());
+            throw new IllegalArgumentException("Phone number already exists: " + request.getPhone());
+        }
+
+        // Convert DTO to Entity
+        User user = userMapper.toEntity(request);
+
+        // Encode password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Geocode pincode to get coordinates (CRITICAL for providers - used for search)
+        geocodeAndSetUserLocation(user, request.getPincode(), "PROVIDER");
+
+        // Save to database
+        User savedUser = userRepository.save(user);
+        log.info("Successfully registered provider with ID: {} with service type: {}", savedUser.getId(), savedUser.getServiceType());
+
+        // TODO: Auto-create default service listing for the provider
+        // This would require ServiceListingService dependency injection
+        // For now, providers will need to manually create services via "Add Service" button
+        // Future enhancement: Inject ServiceListingService and create default listing here
+
+        // Convert to Response DTO
+        return userMapper.toResponse(savedUser);
+    }
+
+    /**
+     * Authenticate user login.
+     * Verifies email and password, returns User entity if successful.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public User authenticateUser(LoginRequest request) {
+        log.info("Authenticating user with email: {}", request.getEmail());
+
+        // Find user by email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", request.getEmail());
+                    return new IllegalArgumentException("Invalid email or password");
+                });
+
+        // Verify password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.error("Invalid password for user: {}", request.getEmail());
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        // Check if account is active
+        if (!user.getActive()) {
+            log.error("Account is inactive: {}", request.getEmail());
+            throw new IllegalArgumentException("Account is inactive. Please contact support.");
+        }
+
+        log.info("Successfully authenticated user: {}", request.getEmail());
+        return user;
+    }
+
+    /**
+     * Get user by ID.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id) {
+        log.info("Fetching user with ID: {}", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("User not found with ID: {}", id);
+                    return new IllegalArgumentException("User not found with ID: " + id);
+                });
+
+        return userMapper.toResponse(user);
+    }
+
+    /**
+     * Get user entity by ID (for internal service use).
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserEntityById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
+    }
+
+    /**
+     * Get user by email.
+     */
+    /**
+     * Get user by email (returns DTO).
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmailDTO(String email) {
+        log.info("Fetching user DTO with email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new IllegalArgumentException("User not found with email: " + email);
+                });
+
+        return userMapper.toResponse(user);
+    }
+
+    /**
+     * Get user entity by email (returns User entity for internal use).
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserByEmail(String email) {
+        log.info("Fetching user entity with email: {}", email);
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new IllegalArgumentException("User not found with email: " + email);
+                });
+    }
+
+    /**
+     * Update user profile.
+     * Supports partial updates - only non-null fields are updated.
+     */
+    @Override
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+        log.info("Updating user with ID: {}", id);
+
+        // Find existing user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("User not found with ID: {}", id);
+                    return new IllegalArgumentException("User not found with ID: " + id);
+                });
+
+        // Validate phone uniqueness if being updated
+        if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
+            if (phoneExists(request.getPhone())) {
+                log.error("Phone number already exists: {}", request.getPhone());
+                throw new IllegalArgumentException("Phone number already exists: " + request.getPhone());
+            }
+        }
+
+        // Check if pincode is being updated
+        Integer oldPincode = user.getPincode();
+        boolean pincodeChanged = request.getPincode() != null && !request.getPincode().equals(oldPincode);
+
+        // Update entity with new values
+        userMapper.updateEntity(user, request);
+
+        // If pincode changed, automatically geocode to get new coordinates
+        if (pincodeChanged) {
+            log.info("Pincode changed from {} to {} for user {}, triggering automatic geocoding",
+                     oldPincode, request.getPincode(), id);
+            geocodeAndSetUserLocation(user, request.getPincode(), user.getRole().name());
+        }
+
+        // Save updated user
+        User updatedUser = userRepository.save(user);
+        log.info("Successfully updated user with ID: {}", id);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Update user entity directly (for location updates).
+     */
+    @Override
+    @Transactional
+    public User updateUser(Long id, User user) {
+        log.info("Updating user entity with ID: {}", id);
+
+        // Verify user exists
+        if (!userRepository.existsById(id)) {
+            log.error("User not found with ID: {}", id);
+            throw new IllegalArgumentException("User not found with ID: " + id);
+        }
+
+        // Save updated user entity
+        User updatedUser = userRepository.save(user);
+        log.info("Successfully updated user entity with ID: {}", id);
+
+        return updatedUser;
+    }
+
+    /**
+     * Delete user account.
+     * Performs HARD DELETE - permanently removes user from database.
+     * This is used by admin to completely remove users from the system.
+     * Handles cascading deletion of all related data.
+     */
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        log.info("=== STARTING USER DELETION: ID {} ===", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("User not found with ID: {}", id);
+                    return new IllegalArgumentException("User not found with ID: " + id);
+                });
+
+        log.info("Deleting user: {} ({}), Role: {}", user.getName(), user.getEmail(), user.getRole());
+
+        // If provider, delete all related data in correct order
+        if (user.getRole() == Role.PROVIDER) {
+            log.info("Provider deletion - removing related data...");
+
+            // Get provider's service listings
+            var services = serviceListingRepository.findByProviderId(id);
+            log.info("Found {} service listings", services.size());
+
+            // For each service, delete related data
+            for (var service : services) {
+                Long serviceId = service.getId();
+
+                // Delete reviews on this service
+                var reviews = reviewRepository.findByServiceListingId(serviceId);
+                if (!reviews.isEmpty()) {
+                    reviewRepository.deleteAll(reviews);
+                    log.info("Deleted {} reviews for service {}", reviews.size(), serviceId);
+                }
+
+                // Delete bookings for this service
+                var bookings = bookingRepository.findByServiceListingId(serviceId);
+                if (!bookings.isEmpty()) {
+                    bookingRepository.deleteAll(bookings);
+                    log.info("Deleted {} bookings for service {}", bookings.size(), serviceId);
+                }
+
+                // Delete specific availability for this service
+                var availability = specificAvailabilityRepository.findByServiceListing(service);
+                if (!availability.isEmpty()) {
+                    specificAvailabilityRepository.deleteAll(availability);
+                    log.info("Deleted {} availability records for service {}", availability.size(), serviceId);
+                }
+            }
+
+            // Delete all provider's specific availability (not tied to specific service)
+            var providerAvailability = specificAvailabilityRepository.findByProvider(user);
+            if (!providerAvailability.isEmpty()) {
+                specificAvailabilityRepository.deleteAll(providerAvailability);
+                log.info("Deleted {} general availability records for provider", providerAvailability.size());
+            }
+
+            // Finally, delete all service listings
+            if (!services.isEmpty()) {
+                serviceListingRepository.deleteAll(services);
+                log.info("Deleted {} service listings", services.size());
+            }
+        }
+
+        // If customer, delete their bookings and reviews
+        if (user.getRole() == Role.CUSTOMER) {
+            log.info("Customer deletion - removing related data...");
+
+            // Delete customer's bookings
+            var customerBookings = bookingRepository.findByCustomerId(id);
+            if (!customerBookings.isEmpty()) {
+                bookingRepository.deleteAll(customerBookings);
+                log.info("Deleted {} bookings for customer", customerBookings.size());
+            }
+
+            // Delete customer's reviews
+            var customerReviews = reviewRepository.findByCustomerId(id);
+            if (!customerReviews.isEmpty()) {
+                reviewRepository.deleteAll(customerReviews);
+                log.info("Deleted {} reviews by customer", customerReviews.size());
+            }
+        }
+
+        // Hard delete - permanently remove from database
+        userRepository.deleteById(id);
+
+        log.info("✅ Successfully permanently deleted user: {} (ID: {})", user.getName(), id);
+        log.info("=== USER DELETION COMPLETE ===");
+    }
+
+    /**
+     * Search providers by keyword (name or service type).
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> searchProviders(String keyword) {
+        log.info("Searching providers with keyword: {}", keyword);
+
+        List<User> providers = userRepository.searchProviders(keyword, Role.PROVIDER);
+
+        return providers.stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get providers by city.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getProvidersByCity(String city) {
+        log.info("Fetching providers in city: {}", city);
+
+        List<User> providers = userRepository.findByCityAndRole(city, Role.PROVIDER);
+
+        return providers.stream()
+                .filter(User::getActive)
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get providers by service type.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getProvidersByServiceType(String serviceType) {
+        log.info("Fetching providers with service type: {}", serviceType);
+
+        List<User> providers = userRepository.findByServiceTypeAndVerifiedAndActive(
+                serviceType, true, true
+        );
+
+        return providers.stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get top-rated providers in a city (internal method).
+     */
+    @Transactional(readOnly = true)
+    public List<UserResponse> getTopRatedProviders(String city, Double minRating) {
+        log.info("Fetching top-rated providers in city: {} with min rating: {}", city, minRating);
+
+        List<User> providers = userRepository.findTopRatedProviders(city, Role.PROVIDER, minRating);
+
+        return providers.stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get top-rated providers in a city with limit.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getTopRatedProvidersByCity(String city, int limit) {
+        log.info("Fetching top {} rated providers in city: {}", limit, city);
+
+        List<User> providers = userRepository.findTopRatedProviders(city, Role.PROVIDER, 4.0);
+
+        return providers.stream()
+                .limit(limit)
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Verify a provider account (admin function).
+     */
+    @Override
+    public UserResponse verifyProvider(Long providerId) {
+        log.info("Verifying provider with ID: {}", providerId);
+
+        User provider = userRepository.findById(providerId)
+                .orElseThrow(() -> {
+                    log.error("Provider not found with ID: {}", providerId);
+                    return new IllegalArgumentException("Provider not found with ID: " + providerId);
+                });
+
+        if (!provider.isProvider()) {
+            log.error("User is not a provider: {}", providerId);
+            throw new IllegalArgumentException("User is not a provider");
+        }
+
+        provider.setVerified(true);
+        User verifiedProvider = userRepository.save(provider);
+
+        log.info("Successfully verified provider with ID: {}", providerId);
+        return userMapper.toResponse(verifiedProvider);
+    }
+
+    /**
+     * Check if email already exists.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    /**
+     * Check if phone number already exists.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean phoneExists(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
+    // ============================================
+    // Private Helper Methods (Refactored for DRY)
+    // ============================================
+
+    /**
+     * Geocode user's pincode and set coordinates on the user entity.
+     * Uses LocationService with automatic fallback mechanism.
+     * Prevents code duplication across admin, customer, and provider registration.
+     *
+     * @param user User entity to update with coordinates
+     * @param pincode Pincode to geocode
+     * @param roleType User role for logging purposes (ADMIN, CUSTOMER, PROVIDER)
+     */
+    private void geocodeAndSetUserLocation(User user, Integer pincode, String roleType) {
+        try {
+            Coordinates coords = locationService.getCoordinatesFromPincode(pincode);
+            user.setLatitude(coords.getLatitude());
+            user.setLongitude(coords.getLongitude());
+            log.info("Geocoded pincode {} to coordinates: {}, {} for {}",
+                    pincode, coords.getLatitude(), coords.getLongitude(), roleType);
+        } catch (Exception e) {
+            log.warn("Failed to geocode pincode {} for {}: {}",
+                    pincode, roleType, e.getMessage());
+            // Continue without coordinates - LocationService fallback handles this
+        }
+    }
+
+    /**
+     * Refresh coordinates for a specific user based on their current pincode.
+     * Useful for fixing users with NULL coordinates.
+     *
+     * @param userId user ID
+     * @return UserResponse with updated coordinates
+     * @throws IllegalArgumentException if user not found or pincode is invalid
+     */
+    @Override
+    public UserResponse refreshUserCoordinates(Long userId) {
+        log.info("Refreshing coordinates for user ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        if (user.getPincode() == null) {
+            throw new IllegalArgumentException("User does not have a pincode set. Please update profile with a valid pincode.");
+        }
+
+        // Force re-geocode even if coordinates exist
+        geocodeAndSetUserLocation(user, user.getPincode(), user.getRole().name());
+
+        // Save updated user
+        User updatedUser = userRepository.save(user);
+        log.info("Successfully refreshed coordinates for user {} ({}, {})",
+                userId, updatedUser.getLatitude(), updatedUser.getLongitude());
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Refresh coordinates for all users who have NULL coordinates.
+     * This is a batch operation to fix existing users.
+     *
+     * @return count of users whose coordinates were successfully updated
+     */
+    @Override
+    @Transactional
+    public int refreshAllMissingCoordinates() {
+        log.info("Starting batch coordinate refresh for users with NULL coordinates");
+
+        // Find all users with NULL coordinates but valid pincode
+        List<User> usersWithNullCoords = userRepository.findAll().stream()
+                .filter(user -> user.getPincode() != null)
+                .filter(user -> user.getLatitude() == null || user.getLongitude() == null)
+                .collect(Collectors.toList());
+
+        log.info("Found {} users with missing coordinates", usersWithNullCoords.size());
+
+        int successCount = 0;
+        for (User user : usersWithNullCoords) {
+            try {
+                geocodeAndSetUserLocation(user, user.getPincode(), user.getRole().name());
+                if (user.getLatitude() != null && user.getLongitude() != null) {
+                    userRepository.save(user);
+                    successCount++;
+                    log.info("Successfully geocoded user {} (ID: {}): {}, {}",
+                            user.getName(), user.getId(), user.getLatitude(), user.getLongitude());
+                }
+            } catch (Exception e) {
+                log.error("Failed to geocode user {} (ID: {}): {}", user.getName(), user.getId(), e.getMessage());
+            }
+        }
+
+        log.info("Batch coordinate refresh complete: {}/{} users updated", successCount, usersWithNullCoords.size());
+        return successCount;
+    }
+}
+
+
