@@ -1,8 +1,14 @@
-# 🛠️ Service-Spot v4.0.2
+# 🛠️ Service-Spot v4.0.3
 
 > A Localized Service Discovery and Booking Platform connecting customers with trusted service providers.
 
-**Latest Updates (v4.0.2 - December 12, 2025):**
+**Latest Updates (v4.0.3 - December 15, 2025):**
+- 🔧 **FIXED**: Popular Businesses now shows ALL unique categories from database
+- ✨ **ENHANCED**: Multi-category providers display correctly (e.g., Beauty + Gardening both show)
+- 🎨 **MAINTAINED**: Category card design with icons (no detail overload)
+- 🚀 **DATABASE-DRIVEN**: Categories extracted from actual services, not hardcoded
+
+**Previous Updates (v4.0.2 - December 12, 2025):**
 - 🔧 **FIXED**: Past time slots are now hidden when booking for today (30-min buffer)
 - 🔧 **FIXED**: Time display shows correctly (3:00 PM displays as 3:00 PM, not 9:00 PM)
 - 🔧 **FIXED**: Providers can now set availability for today (not just future dates)
@@ -13,11 +19,7 @@
 **Previous Updates (v4.0.1 - December 9, 2025):**
 - 🔧 Fixed past bookings cancellation/completion
 - ⚠️ Enhanced error handling for expired bookings
-<<<<<<< HEAD
-- 📚 Updated documentation with troubleshooting guide
-=======
 - 📝 Improved booking status validation logic
->>>>>>> c697b5983e10f45e38c9a59a968e09bc4ccd65a8
 
 **Previous Updates (v4.0):**
 - ✨ Enhanced booking page with colorful gradient UI
@@ -471,13 +473,21 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 👥 Team
 
 **Team C** - Software Engineering Project  
-**Version**: 4.0.2  
-**Last Updated**: December 12, 2025  
+**Version**: 4.0.3  
+**Last Updated**: December 15, 2025  
 **Status**: Production Ready ✅
 
 ---
 
-## ✨ Recent Improvements (v4.0.2)
+## ✨ Recent Improvements (v4.0.3)
+
+### Latest Fixes (v4.0.3 - December 15)
+- ✅ **Popular Businesses Enhancement**: Shows ALL unique categories from database
+- ✅ **Multi-Category Display**: Providers with multiple category services show all categories
+- ✅ **Database-Driven**: Categories extracted from actual service listings
+- ✅ **Original Design**: Maintains category card design (icon + name)
+
+### Previous Fixes (v4.0.2 - December 12)
 
 ### Bug Fixes
 - ✅ **Past Time Slots**: Can't select past times when booking for today
@@ -526,9 +536,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Built with ❤️ by Team C | Production Ready v4.0.2** 🚀
-
-**Built with ❤️ by Team C**
+**Built with ❤️ by Team C | Production Ready v4.0.3** 🚀
 
 ## 📞 Support
 

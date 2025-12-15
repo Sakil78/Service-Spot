@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, TrendingUp } from 'lucide-react';
-import { SERVICE_CATEGORIES, CITIES } from '../utils/constants';
+import { SERVICE_CATEGORIES } from '../utils/constants';
 import { getCategoryIcon } from '../utils/categoryIcons';
 import ImageSlider from '../components/ImageSlider';
-import { providerAPI } from '../services/api';
+import { providerAPI, serviceAPI } from '../services/api';
 
 /* Why: Single-file landing page improved with glassy hero, CTA, and accessible search */
 export default function LandingPage() {
@@ -14,7 +14,7 @@ export default function LandingPage() {
 
   // Dynamic data from database
   const [availableCities, setAvailableCities] = useState([]);
-  const [availableServices, setAvailableServices] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]); // Categories that have services
   const [loading, setLoading] = useState(true);
 
   // Handle hash navigation to scroll to Popular Businesses section
@@ -31,46 +31,44 @@ export default function LandingPage() {
     }
   }, []);
 
-  // Fetch available cities and services on component mount
+  // Fetch available cities and categories on component mount
   useEffect(() => {
     const fetchAvailableData = async () => {
       try {
         setLoading(true);
 
-        // Fetch available cities from providers using centralized API
+        // Fetch available cities from providers
         const citiesResponse = await providerAPI.getAvailableCities();
         const cities = citiesResponse.data.data || [];
+        setAvailableCities(cities);
+        console.log('✅ Fetched cities:', cities);
 
-        // Try to fetch categories from new endpoint first (shows "Others" automatically)
+        // Fetch ALL service listings to extract unique categories
         try {
-          const categoriesResponse = await fetch('http://localhost:8080/api/categories/with-services');
-          const categoriesData = await categoriesResponse.json();
+          const servicesResponse = await serviceAPI.search({});
+          const allServices = servicesResponse.data?.data || servicesResponse.data || [];
 
-          if (categoriesData.success && categoriesData.data && categoriesData.data.length > 0) {
-            // New API works! Use category names for services dropdown
-            const categoryNames = categoriesData.data.map(cat => cat.name);
-            setAvailableServices(categoryNames);
-            console.log('✅ Using new categories API:', categoryNames);
-          } else {
-            // Fallback to old method
-            console.log('⚠️ New API returned empty, using fallback');
-            const servicesResponse = await providerAPI.getAvailableServiceTypes();
-            setAvailableServices(servicesResponse.data.data || []);
-          }
-        } catch (categoryError) {
-          // If new API fails, fallback to old method
-          console.log('⚠️ New API failed, using fallback:', categoryError.message);
-          const servicesResponse = await providerAPI.getAvailableServiceTypes();
-          setAvailableServices(servicesResponse.data.data || []);
+          // Extract unique category names from actual services
+          const uniqueCategories = [...new Set(
+            allServices
+              .map(service => service.category?.name || service.categoryName)
+              .filter(cat => cat && cat.trim() !== '')
+          )].sort();
+
+          console.log('✅ Fetched service listings:', allServices.length);
+          console.log('✅ Unique categories from services:', uniqueCategories);
+
+          setAvailableCategories(uniqueCategories);
+        } catch (serviceError) {
+          console.error('❌ Error fetching service listings:', serviceError);
+          // Fallback to empty array
+          setAvailableCategories([]);
         }
 
-        setAvailableCities(cities);
-        console.log('Fetched cities:', cities);
       } catch (error) {
         console.error('Error fetching available data:', error);
-        // Show empty arrays on error
         setAvailableCities([]);
-        setAvailableServices([]);
+        setAvailableCategories([]);
       } finally {
         setLoading(false);
       }
@@ -133,10 +131,9 @@ export default function LandingPage() {
   };
 
 
-  // Show available services from database (up to 16)
-  // If no data, show fallback categories for better UX
-  const featuredCategories = availableServices.length > 0
-    ? availableServices.slice(0, 16)
+  // Show categories from database (up to 16), fallback to hardcoded if empty
+  const displayCategories = availableCategories.length > 0
+    ? availableCategories.slice(0, 16)
     : SERVICE_CATEGORIES.slice(0, 16);
 
   return (
@@ -194,9 +191,9 @@ export default function LandingPage() {
                   disabled={loading}
                 >
                   <option value="">
-                    {loading ? '⏳ Loading services...' : availableServices.length > 0 ? '🔍 Select Service' : '🔍 No services available - Register as provider first'}
+                    {loading ? '⏳ Loading services...' : availableCategories.length > 0 ? '🔍 Select Service' : '🔍 No services available - Register as provider first'}
                   </option>
-                  {availableServices.map((category) => (
+                  {availableCategories.map((category) => (
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
@@ -218,27 +215,44 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white font-display mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
               Popular <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">Businesses</span>
             </h2>
+            <p className="text-gray-300 mt-2">
+              {displayCategories.length > 0
+                ? `${displayCategories.length} categor${displayCategories.length !== 1 ? 'ies' : 'y'} available`
+                : 'No categories available yet'}
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {featuredCategories.map((category) => {
-              const { Icon, color, bg } = getCategoryIcon(category);
-              return (
-                <Link
-                  key={category}
-                  to={`/services?category=${category}`}
-                  className="bg-slate-800/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border-2 border-purple-500/30 hover:border-orange-500 hover:shadow-[0_0_30px_rgba(255,107,53,0.5)] transition-all duration-300 text-center group hover:-translate-y-2"
-                >
-                  <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3 bg-gradient-to-br from-orange-500 to-pink-500 shadow-[0_0_20px_rgba(255,107,53,0.5)] group-hover:scale-110 transition-transform">
-                    <Icon className="text-3xl text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors drop-shadow-lg">
-                    {category}
-                  </h3>
-                </Link>
-              );
-            })}
-          </div>
+          {loading ? (
+            <div className="text-center text-white py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+              <p className="mt-4">Loading categories...</p>
+            </div>
+          ) : displayCategories.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {displayCategories.map((category) => {
+                const { Icon, color, bg } = getCategoryIcon(category);
+                return (
+                  <Link
+                    key={category}
+                    to={`/services?category=${category}`}
+                    className="bg-slate-800/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border-2 border-purple-500/30 hover:border-orange-500 hover:shadow-[0_0_30px_rgba(255,107,53,0.5)] transition-all duration-300 text-center group hover:-translate-y-2"
+                  >
+                    <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3 bg-gradient-to-br from-orange-500 to-pink-500 shadow-[0_0_20px_rgba(255,107,53,0.5)] group-hover:scale-110 transition-transform">
+                      <Icon className="text-3xl text-white" />
+                    </div>
+                    <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors drop-shadow-lg">
+                      {category}
+                    </h3>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 py-12">
+              <p className="text-lg">No categories available yet.</p>
+              <p className="text-sm mt-2">Be the first to register as a provider!</p>
+            </div>
+          )}
         </div>
       </section>
 
