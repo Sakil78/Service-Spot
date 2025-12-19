@@ -72,6 +72,21 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    /**
+     * Password reset token (6-digit code, stored as BCrypt hash)
+     * Used for forgot password functionality
+     * BCrypt hash is 60 characters long
+     */
+    @Column(name = "reset_token", length = 255)
+    private String resetToken;
+
+    /**
+     * Timestamp when the reset token expires
+     * Token is valid for 15 minutes from creation
+     */
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     // ==================== Personal Information ====================
 
     /**

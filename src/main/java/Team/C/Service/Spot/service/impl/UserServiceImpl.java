@@ -644,6 +644,120 @@ public class UserServiceImpl implements UserService {
         log.info("Batch coordinate refresh complete: {}/{} users updated", successCount, usersWithNullCoords.size());
         return successCount;
     }
+
+    /**
+     * Initiate password reset process.
+     * Generates a 6-digit token, sets expiry time (15 minutes from now),
+     * and returns the token to be sent via email/SMS.
+     *
+     * @param email user's email address
+     * @return 6-digit reset token
+     * @throws IllegalArgumentException if email not found
+     */
+    @Override
+    @Transactional
+    public String initiatePasswordReset(String email) {
+        log.info("Initiating password reset for email: {}", email);
+
+        // Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new IllegalArgumentException("No account found with email: " + email);
+                });
+
+        // Generate 6-digit random token
+        String resetToken = String.format("%06d", (int)(Math.random() * 1000000));
+
+        // Set token and expiry (15 minutes from now)
+        user.setResetToken(passwordEncoder.encode(resetToken)); // Hash the token for security
+        user.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+
+        // Save user with reset token
+        userRepository.save(user);
+
+        log.info("Password reset token generated for user ID: {}. Token expires at: {}",
+                user.getId(), user.getResetTokenExpiry());
+
+        // In production, send email/SMS with reset token here
+        // For demo purposes, we return the token directly
+        return resetToken;
+    }
+
+    /**
+     * Verify if the reset token is valid and not expired.
+     *
+     * @param email user's email address
+     * @param token reset token to verify
+     * @return true if valid, false otherwise
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean verifyResetToken(String email, String token) {
+        log.info("Verifying reset token for email: {}", email);
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            log.warn("User not found with email: {}", email);
+            return false;
+        }
+
+        // Check if token exists
+        if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
+            log.warn("No reset token found for user: {}", email);
+            return false;
+        }
+
+        // Check if token has expired
+        if (java.time.LocalDateTime.now().isAfter(user.getResetTokenExpiry())) {
+            log.warn("Reset token expired for user: {}", email);
+            return false;
+        }
+
+        // Verify token matches (compare hashed token)
+        boolean tokenMatches = passwordEncoder.matches(token, user.getResetToken());
+        if (!tokenMatches) {
+            log.warn("Invalid reset token for user: {}", email);
+        }
+
+        return tokenMatches;
+    }
+
+    /**
+     * Reset user password using valid reset token.
+     *
+     * @param email user's email address
+     * @param token reset token
+     * @param newPassword new password to set
+     * @throws IllegalArgumentException if token is invalid or expired
+     */
+    @Override
+    @Transactional
+    public void resetPassword(String email, String token, String newPassword) {
+        log.info("Resetting password for email: {}", email);
+
+        // Verify token first
+        if (!verifyResetToken(email, token)) {
+            log.error("Invalid or expired reset token for email: {}", email);
+            throw new IllegalArgumentException("Invalid or expired reset token");
+        }
+
+        // Find user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Clear reset token and expiry
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+
+        // Save user
+        userRepository.save(user);
+
+        log.info("Password successfully reset for user ID: {}", user.getId());
+    }
 }
 
 

@@ -1,8 +1,8 @@
-# ✅ PRODUCTION READY - Service Spot v4.0.3
+# ✅ PRODUCTION READY - Service Spot v4.1.0
 
 **Status**: ✅ Ready to Deploy  
-**Last Updated**: December 15, 2025  
-**Version**: 4.0.3 (All Critical Fixes Applied + Popular Businesses Enhancement)  
+**Last Updated**: December 20, 2025  
+**Version**: 4.1.0 (Email Service Integration + Security Enhancements)  
 **Build Status**: ✅ Clean (0 errors, 0 warnings)
 
 ---
@@ -13,11 +13,14 @@
 - ✅ **JAR Built**: `target/Service-Spot-0.0.1-SNAPSHOT.jar` (Production-ready)
 - ✅ **Database**: MySQL 8.x compatible with full schema
 - ✅ **Security**: JWT authentication + Spring Security configured
+- ✅ **Email Service**: Gmail SMTP integration (FREE - 500 emails/day)
+- ✅ **Password Reset**: 6-digit code system with email delivery
 - ✅ **Location**: Pincode-based geocoding with Haversine distance calculation
 - ✅ **APIs**: 50+ RESTful endpoints tested and documented
 - ✅ **Validation**: Comprehensive input validation on all DTOs
 - ✅ **Error Handling**: Global exception handler with proper status codes
 - ✅ **CORS**: Environment-based configuration for production
+- ✅ **Environment Variables**: All credentials secured via .env
 
 ### Frontend ✅
 - ✅ **Build**: Production bundle optimized (`frontend/dist/`)
@@ -30,6 +33,7 @@
 - ✅ **Performance**: Code splitting and lazy loading implemented
 - ✅ **React 19 Ready**: All defaultProps removed, modern patterns used
 - ✅ **Console**: Zero warnings, production-quality code
+- ✅ **Forgot Password UI**: Professional email-based password reset flow
 
 ---
 
@@ -37,6 +41,7 @@
 
 ### Core Features (100% Complete)
 - ✅ User authentication (Customer/Provider/Admin)
+- ✅ **NEW**: Forgot Password with email verification (6-digit codes)
 - ✅ 16 service categories with icons
 - ✅ Service listing creation and management
 - ✅ Provider-controlled availability scheduling
@@ -47,10 +52,36 @@
 - ✅ Profile management (Customer & Provider)
 - ✅ Search and filter functionality
 - ✅ Responsive UI with professional theme
+- ✅ **NEW**: Email notifications (password reset, welcome emails, booking confirmations)
 
 ---
 
-## 🔧 Recent Fixes Applied (v4.0.3)
+## 🔧 Recent Updates (v4.1.0 - December 20, 2025)
+
+### Email Service Integration ✅
+- ✅ **Gmail SMTP Integration**: Free email service (500 emails/day limit)
+- ✅ **Password Reset Feature**: 
+  - 6-digit verification codes
+  - 15-minute expiry
+  - BCrypt hashing for security
+  - Professional HTML email templates
+- ✅ **Email Features Ready**:
+  - Password reset emails ✅ WORKING
+  - Welcome emails (implemented, ready to use)
+  - Booking confirmations (implemented, ready to use)
+- ✅ **Works with ANY email provider**: Gmail, Yahoo, Outlook, custom domains
+- ✅ **Testing**: Email delivery verified and working
+
+### Security Enhancements ✅
+- ✅ **Credentials Protection**: All sensitive data moved to .env file
+- ✅ **application.properties**: Cleaned of hardcoded credentials
+- ✅ **application-prod.properties**: Updated with email configuration
+- ✅ **.gitignore**: Enhanced to protect all sensitive files
+- ✅ **.env.example**: Created template for developers
+- ✅ **Documentation**: Complete security guide (SECURITY.md)
+- ✅ **Safe to Push**: No credentials exposed in Git
+
+### Previous Fixes (v4.0.3 - December 15, 2025) ✅
 
 ### Critical Fixes ✅
 - ✅ **Popular Businesses Category Display** (Dec 15): Fixed to show ALL unique categories from database

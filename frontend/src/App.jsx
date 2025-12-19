@@ -13,6 +13,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ServiceListPage = lazy(() => import('./pages/ServiceListPage'));
 const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
 const ProviderDetailPage = lazy(() => import('./pages/ProviderDetailPage'));
@@ -55,6 +56,7 @@ export default function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/services" element={<ServiceListPage />} />
               <Route path="/services/:id" element={<ServiceDetailPage />} />
               <Route path="/providers/:id" element={<ProviderDetailPage />} />

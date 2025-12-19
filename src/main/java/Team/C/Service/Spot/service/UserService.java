@@ -198,4 +198,34 @@ public interface UserService {
      * @return true if phone exists, false otherwise
      */
     boolean phoneExists(String phone);
+
+    /**
+     * Initiate password reset process.
+     * Generates a 6-digit token and sets expiry time.
+     * In production, this would also send an email with the token.
+     *
+     * @param email user's email address
+     * @return password reset token (6-digit code)
+     * @throws IllegalArgumentException if email not found
+     */
+    String initiatePasswordReset(String email);
+
+    /**
+     * Verify password reset token.
+     *
+     * @param email user's email address
+     * @param token reset token (6-digit code)
+     * @return true if token is valid and not expired, false otherwise
+     */
+    boolean verifyResetToken(String email, String token);
+
+    /**
+     * Reset user password using reset token.
+     *
+     * @param email user's email address
+     * @param token reset token (6-digit code)
+     * @param newPassword new password to set
+     * @throws IllegalArgumentException if token is invalid or expired
+     */
+    void resetPassword(String email, String token, String newPassword);
 }

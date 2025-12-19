@@ -292,6 +292,14 @@ const LoginPage = () => {
                   />
                   <div className="absolute left-3 top-3 text-slate-400"><Lock size={16} /></div>
                 </div>
+                <div className="text-right mt-2">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
               </div>
 
               <button type="submit" disabled={loading} className="w-full btn-primary">

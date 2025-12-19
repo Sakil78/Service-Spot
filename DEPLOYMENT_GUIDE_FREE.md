@@ -1,6 +1,7 @@
-# 🚀 Deploy Service Spot for FREE
+# 🚀 Deploy Service Spot for FREE (v4.1.0)
 
-**Time: 15-20 minutes | Cost: $0/month**
+**Time: 15-20 minutes | Cost: $0/month**  
+**Includes: Email Service (Password Reset)**
 
 ---
 
@@ -31,8 +32,20 @@ SPRING_PROFILES_ACTIVE=prod
 JWT_SECRET=<run command below>
 FRONTEND_URL=http://localhost:3000
 
+# Email Configuration (for password reset)
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-16-char-app-password
+EMAIL_FROM=your-email@gmail.com
+
 # Generate JWT Secret (PowerShell):
 -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 64 | ForEach-Object {[char]$_})
+
+# Get Gmail App Password:
+# 1. Go to: https://myaccount.google.com/security
+# 2. Enable 2-Factor Authentication
+# 3. Go to: https://myaccount.google.com/apppasswords
+# 4. Create app password for "ServiceSpot"
+# 5. Copy 16-character password (remove spaces!)
 
 # 4. Link DATABASE_URL:
 # - Click backend service → Variables

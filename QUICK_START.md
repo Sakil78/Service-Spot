@@ -1,22 +1,26 @@
-# 🚀 QUICK START GUIDE - Service-Spot v4
+# 🚀 QUICK START GUIDE - Service-Spot v4.1.0
 
-**Last Updated:** December 12, 2025  
-**Status:** ✅ Production Ready - All Fixes Applied
+**Last Updated:** December 20, 2025  
+**Status:** ✅ Production Ready - Email Service Integrated
 
 ---
 
-## ⚡ Quick Start (3 Commands)
+## ⚡ Quick Start (3 Steps)
 
 ```bash
-# 1. Start Backend (Terminal 1)
+# 1. Setup Environment (First Time Only)
+cp .env.example .env
+# Edit .env with your credentials
+
+# 2. Start Backend (Terminal 1)
 cd "service-spotV4(location tracking, no payment)"
 mvn spring-boot:run
 
-# 2. Start Frontend (Terminal 2)
+# 3. Start Frontend (Terminal 2)
 cd frontend
 npm run dev
 
-# 3. Open Browser
+# 4. Open Browser
 http://localhost:3000
 ```
 
@@ -24,8 +28,17 @@ http://localhost:3000
 
 ---
 
-## ✅ What's Fixed (Summary)
+## ✅ What's New (v4.1.0)
 
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Email Service | ✅ Working | Gmail SMTP for password reset |
+| Forgot Password | ✅ Working | 6-digit code verification |
+| Credentials Security | ✅ Fixed | All secrets in .env file |
+| Email Notifications | ✅ Ready | Welcome, booking confirmations |
+| Professional Templates | ✅ Ready | HTML email templates |
+
+### Previous Fixes (v4.0.3):
 | Issue | Status | Impact |
 |-------|--------|--------|
 | Availability date validation | ✅ Fixed | Can add today's slots |
@@ -36,9 +49,9 @@ http://localhost:3000
 
 ---
 
-## 🎯 First-Time Setup Only
+## 🎯 First-Time Setup
 
-### Prerequisites:
+### 1. Prerequisites:
 ```bash
 ✅ Java 21 installed
 ✅ Maven installed  
@@ -46,51 +59,96 @@ http://localhost:3000
 ✅ MySQL 8.x running
 ```
 
-### Database Setup:
+### 2. Database Setup:
 ```sql
 -- In MySQL Workbench or command line:
 CREATE DATABASE service_spot;
 ```
 
-### Configuration:
-1. Update `application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/service_spot
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+### 3. Environment Variables Setup:
+
+**Copy the template:**
+```bash
+cp .env.example .env
 ```
 
-2. Backend will auto-create tables and load 17 categories on first run ✅
+**Edit `.env` file with your credentials:**
+```env
+# Database
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_mysql_password
+
+# Email (for password reset - REQUIRED!)
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-16-char-app-password
+EMAIL_FROM=your-email@gmail.com
+
+# Security
+JWT_SECRET=your_random_secret_key
+```
+
+**Get Gmail App Password:**
+1. Go to: https://myaccount.google.com/security
+2. Enable 2-Factor Authentication
+3. Go to: https://myaccount.google.com/apppasswords
+4. Create app password for "ServiceSpot"
+5. Copy 16-character password (remove spaces!)
+6. Add to `.env` file
+
+**Why .env?**
+- ✅ Keeps credentials safe (not in Git)
+- ✅ Easy to change per environment
+- ✅ Industry standard practice
+
+### 4. Run Application:
+```bash
+# Backend
+mvn spring-boot:run
+
+# Frontend (separate terminal)
+cd frontend
+npm run dev
+```
+
+Backend auto-creates tables and loads categories on first run ✅
 
 ---
 
 ## 🧪 Quick Test Flow
 
-### 1. Register Provider:
+### 1. Test Email Service (NEW!):
+- Go to: http://localhost:3000/login
+- Click: **Forgot Password?**
+- Enter email
+- Check inbox for 6-digit code ✅
+- Enter code and reset password ✅
+
+### 2. Register Provider:
 - Go to: http://localhost:3000/signup
 - Select: **Service Provider**
 - Fill form with pincode
 - Submit ✅
+- Check email for welcome message (if implemented)
 
-### 2. Add Service:
+### 3. Add Service:
 - Login as provider
 - Click: **Add Service**
 - Enter any category name (e.g., "Water Service")
 - Add availability for **today** ✅
 - Submit ✅
 
-### 3. Check Landing Page:
+### 4. Check Landing Page:
 - Go to: http://localhost:3000
-- See your service displayed with **actual name** ✅
-- Not under generic "Others" category ✅
+- See your service displayed ✅
+- Categories auto-organized ✅
 
-### 4. Register Customer:
+### 5. Register Customer:
 - Logout
 - Signup as **Customer**
 - Use different pincode
 - See **distance** to provider ✅
 
-### 5. Book Service:
+### 6. Book Service:
 - Browse services
 - Click: **Book Now**
 - Select available slot

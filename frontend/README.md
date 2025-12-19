@@ -1,9 +1,9 @@
-# 🎨 Service-Spot Frontend v4.0
+# 🎨 Service-Spot Frontend v4.1.0
 
-React-based frontend application for Service-Spot - A Localized Service Discovery and Booking Platform with Location Tracking.
+React-based frontend application for Service-Spot - A Localized Service Discovery and Booking Platform with Location Tracking and Email Services.
 
-**Version**: 4.0  
-**Last Updated**: December 1, 2025  
+**Version**: 4.1.0  
+**Last Updated**: December 20, 2025  
 **Status**: Production Ready ✅
 
 ---
@@ -18,6 +18,7 @@ React-based frontend application for Service-Spot - A Localized Service Discover
 - 💼 Book services with complete address and pincode
 - 📊 Manage bookings (view status, track progress)
 - ⭐ Leave reviews after service completion
+- 🔐 **NEW**: Forgot Password with email verification
 - 🎨 Modern dark-themed UI with smooth animations
 - 📱 Fully responsive (mobile, tablet, desktop)
 
@@ -30,15 +31,18 @@ React-based frontend application for Service-Spot - A Localized Service Discover
 - 💼 Professional profile with business details
 - 🎯 Service listing management (create, edit, delete)
 - 📍 Location automatically set via pincode
+- 🔐 **NEW**: Secure password reset via email
 
 ### System Features
 - 🔐 JWT-based secure authentication
+- 📧 **NEW**: Email-based password reset (6-digit codes)
 - 🎨 Modern glassmorphic dark theme
 - ⚡ Fast loading with code splitting
 - 🌈 Beautiful gradient UI with animations
 - 🔄 Real-time data updates
 - 📱 PWA-ready architecture
 - ♿ Accessible UI components
+- ⚠️ Zero console warnings (React 19 ready)
 
 ---
 
@@ -46,7 +50,7 @@ React-based frontend application for Service-Spot - A Localized Service Discover
 
 - **Framework**: React 18.2.0
 - **Build Tool**: Vite 5.4.21
-- **Routing**: React Router v6
+- **Routing**: React Router v6 (v7 future flags enabled)
 - **Styling**: Tailwind CSS 3.x
 - **HTTP Client**: Axios
 - **Icons**: React Icons + Lucide React

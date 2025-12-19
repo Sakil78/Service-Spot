@@ -1,60 +1,160 @@
-# Compiled class files
-node_modules/
-# Node modules (if any)
-
-Thumbs.db
-ehthumbs.db
-.Trashes
-.Spotlight-V100
-._*
-.DS_Store?
-.DS_Store
-# OS generated files
-
-.env.development.local
-.env.production.local
-.env.local
-.env
-# Environment variables
-
-application-dev.properties
-application-local.properties
-# Application properties (sensitive data)
-
+### Java ###
+*.class
 *.log
-# Log files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
 
-.mvn/timing.properties
-buildNumber.properties
-dependency-reduced-pom.xml
-release.properties
-pom.xml.next
-pom.xml.versionsBackup
-pom.xml.releaseBackup
-pom.xml.tag
-target/
 # Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
-.vscode/
-# VS Code
+# Spring Boot
+.apt_generated
+.apt_generated_test
+.factorypath
+.springBeans
+.sts4-cache
 
-*.ipr
+### IntelliJ IDEA ###
+.idea
 *.iws
 *.iml
-.idea/
-# IntelliJ IDEA
+*.ipr
+out/
 
+### Eclipse ###
 .settings/
+.classpath
+.project
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+### VS Code ###
+.vscode/
+*.code-workspace
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### Mac OS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Windows ###
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+### Linux ###
+*~
+
+### Node.js (Frontend) ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend Build
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.cache/
+
+# Frontend Environment
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+### Backend Environment & Sensitive Files ###
+.env
+.env.local
+.env.production
+application-prod.properties
+**/application-prod.properties
+
+# Keep example files
+!.env.example
+!application-prod.properties.example
+
+### Logs ###
+logs/
+*.log
+
+### Database ###
+*.db
+*.sqlite
+*.sqlite3
+
+### System Files ###
+.Spotlight-V100
+.Trashes
+._*
+
+### Backup Files ###
+*.bak
+*.backup
+*.old
+*.orig
+
+### Compiled Output ###
+dist/
+build/
+out/
+
+### Coverage ###
+coverage/
+*.lcov
+.nyc_output
+
+### IDEs and Editors ###
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 .project
 .classpath
-# Eclipse
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-*.rar
-*.tar.gz
-*.zip
-*.ear
-*.war
-*.jar
-target/
-*.class
+### Testing ###
+test-results/
+playwright-report/
 

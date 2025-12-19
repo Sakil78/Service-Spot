@@ -1,8 +1,19 @@
-# 🛠️ Service-Spot v4.0.3
+# 🛠️ Service-Spot v4.1.0
 
 > A Localized Service Discovery and Booking Platform connecting customers with trusted service providers.
 
-**Latest Updates (v4.0.3 - December 15, 2025):**
+**Latest Updates (v4.1.0 - December 20, 2025):**
+- 📧 **NEW**: Email Service Integration (Gmail SMTP - FREE!)
+  - Password reset with 6-digit verification codes
+  - Professional HTML email templates
+  - Email notifications for bookings
+  - 100% FREE (500 emails/day limit)
+  - Works with ANY email provider for recipients (Gmail, Yahoo, Outlook, etc.)
+- 🔐 **ENHANCED**: Forgot Password feature with email delivery
+- ✅ **IMPROVED**: Better error handling for email authentication
+- 📚 **DOCUMENTED**: Complete email setup guide included
+
+**Previous Updates (v4.0.3 - December 15, 2025):**
 - 🔧 **FIXED**: Popular Businesses now shows ALL unique categories from database
 - ✨ **ENHANCED**: Multi-category providers display correctly (e.g., Beauty + Gardening both show)
 - 🎨 **MAINTAINED**: Category card design with icons (no detail overload)
@@ -89,6 +100,11 @@
 - ⚡ **NEW!** React 19 compatible - zero console warnings
 - 🚀 **NEW!** React Router v7 ready with future flags
 - 🎯 **NEW!** Enhanced validation with clear error messages
+- 📧 **NEW!** Email Service (Gmail SMTP - FREE!)
+  - Password reset with 6-digit codes
+  - Professional HTML email templates
+  - 500 emails/day limit (FREE forever)
+  - Works with ANY email provider for recipients
 
 ### 16 Service Categories
 1. **Education** - Tutoring and educational services
@@ -154,15 +170,45 @@ cd service-spotV4
    CREATE DATABASE service_spot;
    ```
 
-### 3️⃣ Configure Backend
+### 3️⃣ Configure Environment Variables
 
-Update `src/main/resources/application.properties`:
+**IMPORTANT: Never commit credentials to Git!**
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/service_spot
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
-```
+1. **Copy the template file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env` with your credentials:**
+   ```env
+   # Database
+   DATABASE_USERNAME=root
+   DATABASE_PASSWORD=your_mysql_password
+
+   # Email (for password reset)
+   EMAIL_USERNAME=your-email@gmail.com
+   EMAIL_PASSWORD=your-16-char-app-password
+   EMAIL_FROM=your-email@gmail.com
+
+   # Security
+   JWT_SECRET=your_random_secret_key
+   ```
+
+3. **Get Gmail App Password** (for email features):
+   - Go to: https://myaccount.google.com/security
+   - Enable 2-Factor Authentication
+   - Go to: https://myaccount.google.com/apppasswords
+   - Create app password for "ServiceSpot"
+   - Copy 16-character password (remove spaces)
+   - Add to `.env` file
+
+**Why .env?**
+- ✅ Keeps credentials safe (not committed to Git)
+- ✅ Easy to change per environment
+- ✅ Standard industry practice
+- ✅ Protected by `.gitignore`
+
+📚 **Full security guide:** See `SECURITY.md`
 
 ### 4️⃣ Start Backend
 
@@ -321,6 +367,9 @@ When deployed:
 - `POST /api/auth/register/customer` - Register customer
 - `POST /api/auth/register/provider` - Register provider
 - `POST /api/auth/login` - Login
+- `POST /api/auth/forgot-password` - Request password reset (sends email)
+- `POST /api/auth/verify-reset-token` - Verify reset code
+- `POST /api/auth/reset-password` - Reset password with code
 
 ### Services
 - `GET /api/services` - List all services

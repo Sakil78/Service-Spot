@@ -1,7 +1,7 @@
-# 🚀 Frontend Setup Guide - Service Spot v4.0
+# 🚀 Frontend Setup Guide - Service Spot v4.1.0
 
 **Complete setup instructions for the React frontend**  
-**Last Updated**: December 1, 2025  
+**Last Updated**: December 20, 2025  
 **Time Required**: 5 minutes
 
 ---
@@ -12,6 +12,7 @@ Before starting, ensure you have:
 - ✅ **Node.js 18+** installed (check: `node --version`)
 - ✅ **npm** installed (check: `npm --version`)
 - ✅ **Backend running** on http://localhost:8080
+- ✅ **Backend email service configured** (for password reset feature)
 - ✅ Terminal/Command Prompt access
 
 ---
@@ -40,15 +41,16 @@ npm run dev
 
 ---
 
-## 🎯 What's Included in v4.0
+## 🎯 What's Included in v4.1.0
 
-### ✅ Complete Page Set (15 Pages)
+### ✅ Complete Page Set (16 Pages)
 1. **LandingPage** - Home with 16 service categories
 2. **LoginPage** - User authentication
 3. **SignupPage** - Registration (Customer/Provider)
-4. **ServiceListPage** - Browse services with distance
-5. **ServiceDetailPage** - Service details + booking
-6. **ProviderDetailPage** - Provider profile view
+4. **ForgotPasswordPage** - Email-based password reset (NEW!)
+5. **ServiceListPage** - Browse services with distance
+6. **ServiceDetailPage** - Service details + booking
+7. **ProviderDetailPage** - Provider profile view
 7. **BookingPage** - Create booking with availability
 8. **MyBookingsPage** - Customer booking history
 9. **CustomerDashboard** - Customer overview

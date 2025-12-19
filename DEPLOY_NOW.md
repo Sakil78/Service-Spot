@@ -1,8 +1,9 @@
-# 🚀 DEPLOY NOW - Service Spot v4.0
+# 🚀 DEPLOY NOW - Service Spot v4.1.0
 
 **Copy and paste these commands to deploy your app in 20 minutes**  
-**Last Updated**: December 1, 2025  
-**Cost**: $0/month (Free tier)
+**Last Updated**: December 20, 2025  
+**Cost**: $0/month (Free tier)  
+**Includes**: Email Service (Password Reset)
 
 ---
 
@@ -12,8 +13,10 @@ Before starting, ensure:
 - ✅ App runs successfully on localhost
 - ✅ Backend builds without errors (`mvn clean install`)
 - ✅ Frontend builds without errors (`cd frontend && npm run build`)
-- ✅ All features tested locally
+- ✅ All features tested locally (including email service!)
 - ✅ Git installed on your system
+- ✅ **Gmail App Password** obtained for email service
+- ✅ `.env` file configured (NOT committed to Git!)
 
 ---
 
@@ -32,10 +35,19 @@ Create free accounts on these platforms:
    - Click "Continue with GitHub"
    - Authorize Vercel
 
+4. **Gmail App Password** (for email service):
+   - Go to: https://myaccount.google.com/security
+   - Enable 2-Factor Authentication
+   - Go to: https://myaccount.google.com/apppasswords
+   - Create app password for "ServiceSpot"
+   - Copy 16-character password
+   - **Save it!** You'll need it in Step 4
+
 **Why these?**
 - Railway: Hosts backend + MySQL (free 500 hours/month)
 - Vercel: Hosts React frontend (free unlimited)
 - GitHub: Stores your code
+- Gmail: FREE email service (500 emails/day)
 
 ---
 
@@ -51,7 +63,7 @@ Create free accounts on these platforms:
 openssl rand -base64 64 | tr -d '\n'
 ```
 
-**📋 Copy the output!** You'll need it in Step 3.
+**📋 Copy the output!** You'll need it in Step 4.
 
 Example output: `xK9pL2mN4oP6qR8sT0uV1wX3yZ5aB7cD9eF1gH3iJ5kL7mN9oP1qR3sT5uV7wX9yZ1`
 
@@ -59,22 +71,35 @@ Example output: `xK9pL2mN4oP6qR8sT0uV1wX3yZ5aB7cD9eF1gH3iJ5kL7mN9oP1qR3sT5uV7wX9
 
 ## 📦 Step 3: Push Code to GitHub (5 min)
 
-### 3.1 Initialize Git (if not already)
+**⚠️ IMPORTANT**: Make sure `.env` file is NOT committed!
+
+### 3.1 Verify Security
+```bash
+# Check .env is ignored
+git check-ignore .env
+# Should output: .env
+
+# Verify no credentials in tracked files
+git status
+# Should NOT show .env file
+```
+
+### 3.2 Initialize Git (if not already)
 ```bash
 cd "C:\Users\Ahmed\OneDrive\Desktop\service-spotV4(location tracking, no payment)"
 git init
 git add .
-git commit -m "Initial commit - Service Spot v4.0 Production Ready"
+git commit -m "Initial commit - Service Spot v4.1.0 Production Ready with Email Service"
 ```
 
-### 3.2 Create GitHub Repository
+### 3.3 Create GitHub Repository
 1. Go to https://github.com/new
 2. Repository name: `service-spot-v4`
 3. Keep it **Public** or **Private** (your choice)
 4. Don't initialize with README (we already have one)
 5. Click **Create repository**
 
-### 3.3 Push to GitHub
+### 3.4 Push to GitHub
 ```bash
 git remote add origin https://github.com/YOUR-USERNAME/service-spot-v4.git
 git branch -M main
@@ -111,7 +136,18 @@ PORT=8080
 SPRING_PROFILES_ACTIVE=prod
 JWT_SECRET=<paste-your-generated-secret-from-step-2>
 FRONTEND_URL=https://localhost:3000
+
+# Email Configuration (for password reset)
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=<your-16-char-app-password-from-step-1>
+EMAIL_FROM=your-email@gmail.com
 ```
+
+**Replace:**
+- `JWT_SECRET`: Paste the secret you generated in Step 2
+- `EMAIL_USERNAME`: Your Gmail address
+- `EMAIL_PASSWORD`: 16-character app password (from Step 1)
+- `EMAIL_FROM`: Same as EMAIL_USERNAME
 
 ### 4.4 Connect MySQL to Backend
 1. Still in Variables tab
