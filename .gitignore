@@ -101,15 +101,24 @@ frontend/.env.test.local
 frontend/.env.production.local
 
 ### Backend Environment & Sensitive Files ###
-.env
-.env.local
-.env.production
+# ⚠️ IMPORTANT: application.properties contains database and email credentials!
+# Protect it from being committed to Git
+src/main/resources/application.properties
+**/application.properties
+
+# Production configuration
 application-prod.properties
 **/application-prod.properties
 
-# Keep example files
-!.env.example
+# Environment files (optional - not used in current setup)
+.env
+.env.local
+.env.production
+
+# Keep example/template files for documentation
+!application.properties.example
 !application-prod.properties.example
+!.env.example
 
 ### Logs ###
 logs/

@@ -170,43 +170,38 @@ cd service-spotV4
    CREATE DATABASE service_spot;
    ```
 
-### 3️⃣ Configure Environment Variables
+### 3️⃣ Configure Database & Email Credentials
 
 **IMPORTANT: Never commit credentials to Git!**
 
-1. **Copy the template file:**
-   ```bash
-   cp .env.example .env
+1. **Edit `src/main/resources/application.properties`:**
+   ```properties
+   # Database Configuration
+   spring.datasource.username=root
+   spring.datasource.password=your_mysql_password
+   
+   # Email Configuration (for password reset)
+   spring.mail.username=your-email@gmail.com
+   spring.mail.password=your-16-char-app-password
+   email.from.address=your-email@gmail.com
    ```
 
-2. **Edit `.env` with your credentials:**
-   ```env
-   # Database
-   DATABASE_USERNAME=root
-   DATABASE_PASSWORD=your_mysql_password
-
-   # Email (for password reset)
-   EMAIL_USERNAME=your-email@gmail.com
-   EMAIL_PASSWORD=your-16-char-app-password
-   EMAIL_FROM=your-email@gmail.com
-
-   # Security
-   JWT_SECRET=your_random_secret_key
-   ```
-
-3. **Get Gmail App Password** (for email features):
+2. **Get Gmail App Password** (for email features):
    - Go to: https://myaccount.google.com/security
    - Enable 2-Factor Authentication
    - Go to: https://myaccount.google.com/apppasswords
    - Create app password for "ServiceSpot"
    - Copy 16-character password (remove spaces)
-   - Add to `.env` file
+   - Add to `application.properties`
 
-**Why .env?**
-- ✅ Keeps credentials safe (not committed to Git)
-- ✅ Easy to change per environment
-- ✅ Standard industry practice
-- ✅ Protected by `.gitignore`
+**Why application.properties?**
+- ✅ Simple and standard Spring Boot approach
+- ✅ Works out-of-the-box without extra configuration
+- ✅ Protected by `.gitignore` (won't be committed)
+- ✅ Easy to configure per environment
+
+⚠️ **Note:** `application.properties` is in `.gitignore` to protect your credentials.
+Users cloning the repo should copy `application.properties.example` to `application.properties` and fill in their own credentials.
 
 📚 **Full security guide:** See `SECURITY.md`
 
