@@ -233,10 +233,19 @@ public class ServiceListing {
      * All bookings for this service listing
      * One-to-Many relationship with Booking entity
      */
-    @OneToMany(mappedBy = "serviceListing", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "serviceListing", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
     private List<Booking> bookings = new ArrayList<>();
+
+    /**
+     * Specific availability slots for this service
+     * One-to-Many relationship with SpecificAvailability entity
+     */
+    @OneToMany(mappedBy = "serviceListing", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    private List<SpecificAvailability> availabilitySlots = new ArrayList<>();
 
     // ==================== Helper Methods ====================
 

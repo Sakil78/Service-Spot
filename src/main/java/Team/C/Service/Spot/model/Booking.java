@@ -236,6 +236,16 @@ public class Booking {
     @ToString.Exclude
     private ServiceListing serviceListing;
 
+    /**
+     * Reviews associated with this booking
+     * One-to-Many relationship with Review entity
+     * Cascade delete: When booking is deleted, associated reviews are also deleted
+     */
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    private java.util.List<Review> reviews = new java.util.ArrayList<>();
+
     // ==================== Helper Methods ====================
 
     /**

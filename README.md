@@ -1,8 +1,15 @@
-# 🛠️ Service-Spot v4.1.0
+# 🛠️ Service-Spot v4.1.1
 
 > A Localized Service Discovery and Booking Platform connecting customers with trusted service providers.
 
-**Latest Updates (v4.1.0 - December 20, 2025):**
+**Latest Updates (v4.1.1 - December 26, 2025):**
+- 🔧 **FIXED**: Service deletion now works perfectly with cascade delete
+  - Providers can delete services without foreign key errors
+  - Automatically removes related bookings, reviews, and availability slots
+  - Clean database cleanup with proper cascade relationships
+- ✅ **ENHANCED**: Database integrity with proper entity relationships
+
+**Previous Updates (v4.1.0 - December 20, 2025):**
 - 📧 **NEW**: Email Service Integration (Gmail SMTP - FREE!)
   - Password reset with 6-digit verification codes
   - Professional HTML email templates
@@ -76,6 +83,7 @@
 
 ### For Service Providers
 - 📝 Create and manage service listings
+- 🗑️ **Delete services easily** (no foreign key errors!)
 - 📊 Dashboard with booking overview
 - 💼 Profile management
 - 📍 Location-based service radius
